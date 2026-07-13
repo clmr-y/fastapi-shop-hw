@@ -1,0 +1,7 @@
+__pycache__
+.venv
+.mypy*
+*.db
+.env
+
+create_tables_sql.py
