@@ -1,5 +1,5 @@
 from decimal import Decimal
-
+from datetime import datetime
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
@@ -50,11 +50,25 @@ class Product(BaseModel):
     price: Decimal = Field(..., description="Цена товара в рублях", gt=0, decimal_places=2)
     image_url: str | None = Field(None, description="URL изображения товара")
     stock: int = Field(..., description="Количество товара на складе")
+    rating: int = Field(..., description="Оценка товара")
     category_id: int = Field(..., description="ID категории")
     is_active: bool = Field(..., description="Активность товара")
 
     model_config = ConfigDict(from_attributes=True)
-        
+
+class Review(BaseModel):
+    id: int = Field(..., description="Уникальный идентификатор отзыва")        
+    user_id: int = Field(..., description="ID пользователя, который написал отзыв")
+    product_id: int = Field(..., description="ID товара, которому написали отзыв")
+    comment: str = Field(..., description="Текст комментария")
+    comment_date: datetime = Field(..., description="Дата и время создания отзыва")
+    grade: int = Field(..., description="Рейтинг 1-5")
+    is_active: bool = Field(..., description="Активность отзыва")
+
+class ReviewCreate(BaseModel):
+    product_id: int = Field(description="ID товара")
+    comment: str = Field(description="Текст комментария")
+    grade: int = Field(description="Рейтинг товара 1-5", ge=1, le=5)
 
 class UserCreate(BaseModel):
     email: EmailStr = Field(description="Email пользователя")
