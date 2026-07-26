@@ -1,6 +1,6 @@
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status, Query
-from sqlalchemy import select, update, func
+from sqlalchemy import desc, select, update, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth import get_current_seller
@@ -54,28 +54,44 @@ async def get_all_products(
         filters.append(ProductModel.seller_id == seller_id)
     if ordered_date is not None:
         orders.append(ProductModel.created_at)
+
+    rank_col = None
     if search is not None:
         search_value = search.strip().lower()
         if search_value:
-            filters.append(
-                func.lower(ProductModel.name)
-                .like(f"%{search_value}%"))
+            ts_query = func.websearch_to_tsquery("english", search_value)
+            filters.append(ProductModel.tsv.op("@@")(ts_query))
+            rank_col = func.ts_rank_cd(ProductModel.tsv, ts_query).label("rank")
 
     total_stmt = (
         select(func.count())
         .select_from(ProductModel)
         .where(*filters)
     )
+
     total = await db.scalar(total_stmt) or 0
 
-    products_stmt = (
-        select(ProductModel)
-        .where(*filters)
-        .order_by(*orders)
-        .offset((page-1)*page_size)
-        .limit(page_size)
-    )
-    items = (await db.scalars(products_stmt)).all()
+    if rank_col is not None:
+        products_stmt = (
+            select(ProductModel, rank_col)
+            .where(*filters)
+            .order_by(desc(rank_col), *orders)
+            .offset((page-1)*page_size)
+            .limit(page_size)
+        )
+        result = await db.execute(products_stmt)
+        rows = result.all()
+        items = [row[0] for row in rows]
+    else:
+        products_stmt = (
+            select(ProductModel)
+            .where(*filters)
+            .order_by(*orders)
+            .offset((page-1)*page_size)
+            .limit(page_size)
+        )
+        items = (await db.scalars(products_stmt)).all()
+
     return {
         "items": items,
         "total": total,
