@@ -1,9 +1,11 @@
 from datetime import datetime
 from decimal import Decimal
-from sqlalchemy import func, DateTime, ForeignKey, Numeric, String, Integer
+
+from sqlalchemy import DateTime, ForeignKey, Integer, Numeric, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+
 
 class Order(Base):
     __tablename__ = "orders"

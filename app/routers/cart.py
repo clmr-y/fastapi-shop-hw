@@ -1,4 +1,5 @@
 from decimal import Decimal
+
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,7 +12,11 @@ from app.models.products import Product as ProductModel
 from app.models.users import User as UserModel
 from app.schemas import (
     Cart as CartSchema,
+)
+from app.schemas import (
     CartItem as CartItemSchema,
+)
+from app.schemas import (
     CartItemCreate,
     CartItemUpdate,
 )
