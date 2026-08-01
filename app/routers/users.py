@@ -7,18 +7,24 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth import (
     create_access_token,
     create_refresh_token,
+    get_current_user,
     hash_password,
     verify_password,
 )
 from app.config import ALGORITHM, SECRET_KEY
 from app.db_depends import get_async_db
 from app.models.users import User as UserModel
-from app.schemas import RefreshTokenRequest
+from app.schemas import RefreshTokenRequest, UserCreate
 from app.schemas import User as UserSchema
-from app.schemas import UserCreate
 
 router = APIRouter(prefix="/users", tags=["users"])
 
+
+@router.get("/me", response_model=UserSchema)
+async def get_authenticated_user(
+    user: UserModel = Depends(get_current_user)
+):
+    return user
 
 @router.post("/", response_model=UserSchema, status_code=status.HTTP_201_CREATED)
 async def create_user(user: UserCreate, db: AsyncSession = Depends(get_async_db)):

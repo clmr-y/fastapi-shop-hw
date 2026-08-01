@@ -1,9 +1,22 @@
 from datetime import datetime
 from decimal import Decimal
 
-from sqlalchemy import Computed, Index, func, DateTime, Boolean, Float, ForeignKey, Integer, Numeric, String, text
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import (
+    Boolean,
+    Computed,
+    DateTime,
+    Float,
+    ForeignKey,
+    Index,
+    Integer,
+    Numeric,
+    String,
+    func,
+    text,
+)
 from sqlalchemy.dialects.postgresql import TSVECTOR
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.database import Base
 
 
